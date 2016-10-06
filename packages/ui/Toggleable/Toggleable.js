@@ -8,6 +8,7 @@ import {forward} from '@enact/core/handle';
 import hoc from '@enact/core/hoc';
 import {cap} from '@enact/core/util';
 import React from 'react';
+import R from 'ramda';
 
 const defaultConfig = {
 
@@ -44,7 +45,7 @@ const ToggleableHOC = hoc(defaultConfig, (config, Wrapped) => {
 	const forwardToggle = forward(toggle);
 
 	return class Toggleable extends React.Component {
-		static propTypes = {
+		static propTypes = R.omit(prop, Object.assign({}, Wrapped.propTypes, {
 			/**
 			 * Whether or not the component is in a "toggled" state when first rendered.
 			 * *Note that this property name can be changed by the config. By default it is `defaultSelected`.
@@ -62,11 +63,11 @@ const ToggleableHOC = hoc(defaultConfig, (config, Wrapped) => {
 			 * @public
 			 */
 			disabled: React.PropTypes.bool
-		}
+		}))
 
-		static defaultProps = {
+		static defaultProps = R.omit(prop, Object.assign({}, Wrapped.defaultProps, {
 			[defaultPropKey]: false
-		}
+		}))
 
 		constructor (props) {
 			super(props);

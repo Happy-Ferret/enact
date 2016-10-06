@@ -8,6 +8,7 @@ import {forward} from '@enact/core/handle';
 import hoc from '@enact/core/hoc';
 import {cap} from '@enact/core/util';
 import React from 'react';
+import R from 'ramda';
 
 const defaultConfig = {
 	/**
@@ -58,7 +59,7 @@ const PickableHOC = hoc(defaultConfig, (config, Wrapped) => {
 	const forwardPick = forward(pick);
 
 	return class Pickable extends React.Component {
-		static propTypes = {
+		static propTypes = R.omit(prop, Object.assign({}, Wrapped.propTypes, {
 
 			/**
 			 * The default value of the component. *Note that this property name changes based on the config.*
@@ -77,11 +78,11 @@ const PickableHOC = hoc(defaultConfig, (config, Wrapped) => {
 			 * @public
 			 */
 			disabled: React.PropTypes.bool
-		}
+		}))
 
-		static defaultProps = {
+		static defaultProps = R.omit(prop, Object.assign({}, Wrapped.defaultProps, {
 			[defaultPropKey]: 0
-		}
+		}))
 
 		constructor (props) {
 			super(props);

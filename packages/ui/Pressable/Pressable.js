@@ -8,6 +8,7 @@ import {forward} from '@enact/core/handle';
 import hoc from '@enact/core/hoc';
 import {cap} from '@enact/core/util';
 import React, {PropTypes} from 'react';
+import R from 'ramda';
 
 const defaultConfig = {
 	/**
@@ -52,7 +53,7 @@ const PressableHOC = hoc(defaultConfig, (config, Wrapped) => {
 	const forwardRelease = forward(release);
 
 	return class Pressable extends React.Component {
-		static propTypes = {
+		static propTypes = R.omit(prop, Object.assign({}, Wrapped.propTypes, {
 			/**
 			 * Whether or not the component is in a "pressed" state when first rendered.
 			 * *Note that this property name can be changed by the config. By default it is `defaultPressed`.
@@ -71,12 +72,12 @@ const PressableHOC = hoc(defaultConfig, (config, Wrapped) => {
 			 * @public
 			 */
 			disabled: PropTypes.bool
-		}
+		}))
 
-		static defaultProps = {
+		static defaultProps = Object.assign({}, Wrapped.defaultProps, {
 			[defaultPropKey]: false,
 			disabled: false
-		}
+		})
 
 		constructor (props) {
 			super(props);

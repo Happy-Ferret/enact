@@ -20,7 +20,7 @@ import React from 'react';
  * @public
  */
 const Uppercase = hoc((config, Wrapped) => kind({
-	propTypes: {
+	propTypes: Object.assign({}, Wrapped.propTypes, {
 		/**
 		 * The children string will be uppercased, unless this is set to true.
 		 *
@@ -29,7 +29,7 @@ const Uppercase = hoc((config, Wrapped) => kind({
 		 * @public
 		 */
 		preserveCase: React.PropTypes.bool
-	},
+	}),
 
 	defaultProps: {
 		preserveCase: false

@@ -70,7 +70,7 @@ const defaultConfig = {
 const Spottable = hoc(defaultConfig, (config, Wrapped) => kind({
 	name: 'Spottable',
 
-	propTypes: {
+	propTypes: Object.assign({}, Wrapped.propTypes, {
 		/**
 		 * Whether or not the component is decorated by another spottable component.
 		 *
@@ -97,7 +97,7 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => kind({
 		 * @public
 		 */
 		spotlightDisabled: React.PropTypes.bool
-	},
+	}),
 
 	styles: {
 		className: spottableClass,
