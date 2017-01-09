@@ -4,6 +4,9 @@ import {mount} from 'enzyme';
 import {IncrementSlider, IncrementSliderBase} from '../IncrementSlider';
 import css from '../IncrementSlider.less';
 
+const {max: sliderMax, min: sliderMin} = IncrementSliderBase.defaultProps;
+const sliderValue = (sliderMax - sliderMin) / 2 + sliderMin;
+
 describe('IncrementSlider Specs', () => {
 	it('Should decrement value', function () {
 		const handleChange = sinon.spy();
@@ -25,7 +28,7 @@ describe('IncrementSlider Specs', () => {
 
 	it('Should increment value', function () {
 		const handleChange = sinon.spy();
-		const value = 50;
+		const value = sliderValue;
 		const incrementSlider = mount(
 			<IncrementSlider
 				onChange={handleChange}
@@ -71,7 +74,7 @@ describe('IncrementSlider Specs', () => {
 
 	it('Should invoke onIncrement when increment button is clicked', function () {
 		const handleIncrement = sinon.spy();
-		const value = 50;
+		const value = sliderValue;
 		const incrementSlider = mount(
 			<IncrementSliderBase
 				onIncrement={handleIncrement}
@@ -89,7 +92,7 @@ describe('IncrementSlider Specs', () => {
 
 	it('Should not invoke onIncrement when at upper bounds', function () {
 		const handleIncrement = sinon.spy();
-		const value = 100;
+		const value = sliderMax;
 		const incrementSlider = mount(
 			<IncrementSliderBase
 				onIncrement={handleIncrement}
@@ -107,7 +110,7 @@ describe('IncrementSlider Specs', () => {
 
 	it('Should invoke onDecrement when increment button is clicked', function () {
 		const handleDecrement = sinon.spy();
-		const value = 50;
+		const value = sliderValue;
 		const incrementSlider = mount(
 			<IncrementSliderBase
 				onDecrement={handleDecrement}
@@ -125,7 +128,7 @@ describe('IncrementSlider Specs', () => {
 
 	it('Should not invoke onDecrement when at lower bounds', function () {
 		const handleDecrement = sinon.spy();
-		const value = 0;
+		const value = sliderMin;
 		const incrementSlider = mount(
 			<IncrementSliderBase
 				onDecrement={handleDecrement}
