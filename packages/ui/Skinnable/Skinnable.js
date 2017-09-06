@@ -156,4 +156,8 @@ const withSkinnableProps = hoc((config, Wrapped) => getSkin(Wrapped));
 
 
 export default Skinnable;
-export {Skinnable, withSkinnableProps};
+export {
+	contextTypes,
+	Skinnable,
+	withSkinnableProps
+};
