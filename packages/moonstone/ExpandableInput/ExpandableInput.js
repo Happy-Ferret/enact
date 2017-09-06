@@ -15,6 +15,7 @@ import PropTypes from 'prop-types';
 
 import {calcAriaLabel, Input} from '../Input';
 import {Expandable, ExpandableItemBase} from '../ExpandableItem';
+import Pure from '../internal/Pure';
 
 import css from './ExpandableInput.less';
 
@@ -374,10 +375,12 @@ class ExpandableInputBase extends React.Component {
  * @ui
  * @public
  */
-const ExpandableInput = Expandable(
-	{noPointerMode: true},
-	Changeable(
-		ExpandableInputBase
+const ExpandableInput = Pure(
+	Expandable(
+		{noPointerMode: true},
+		Changeable(
+			ExpandableInputBase
+		)
 	)
 );
 

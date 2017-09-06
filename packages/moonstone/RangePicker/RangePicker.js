@@ -12,6 +12,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {Picker, PickerItem} from '../internal/Picker';
+import Pure from '../internal/Pure';
 import SpottablePicker from '../Picker/SpottablePicker';
 import {validateRange} from '../internal/validators';
 
@@ -247,9 +248,11 @@ const RangePickerBase = kind({
  * @ui
  * @public
  */
-const RangePicker = Changeable(
-	SpottablePicker(
-		RangePickerBase
+const RangePicker = Pure(
+	Changeable(
+		SpottablePicker(
+			RangePickerBase
+		)
 	)
 );
 

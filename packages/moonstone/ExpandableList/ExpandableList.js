@@ -12,6 +12,7 @@ import kind from '@enact/core/kind';
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import Pure from '../internal/Pure';
 import CheckboxItem from '../CheckboxItem';
 import {Expandable, ExpandableItemBase} from '../ExpandableItem';
 import RadioItem from '../RadioItem';
@@ -331,10 +332,12 @@ const ExpandableListBase = kind({
  * @ui
  * @public
  */
-const ExpandableList = Expandable(
-	Changeable(
-		{change: 'onSelect', prop: 'selected'},
-		ExpandableListBase
+const ExpandableList = Pure(
+	Expandable(
+		Changeable(
+			{change: 'onSelect', prop: 'selected'},
+			ExpandableListBase
+		)
 	)
 );
 

@@ -15,6 +15,7 @@ import {MarqueeController} from '../Marquee';
 import {validateRange} from '../internal/validators';
 
 import PickerCore, {PickerItem} from '../internal/Picker';
+import Pure from '../internal/Pure';
 import SpottablePicker from './SpottablePicker';
 
 /**
@@ -213,11 +214,13 @@ const PickerBase = kind({
  * @ui
  * @public
  */
-const Picker = Changeable(
-	MarqueeController(
-		{marqueeOnFocus: true},
-		SpottablePicker(
-			PickerBase
+const Picker = Pure(
+	Changeable(
+		MarqueeController(
+			{marqueeOnFocus: true},
+			SpottablePicker(
+				PickerBase
+			)
 		)
 	)
 );

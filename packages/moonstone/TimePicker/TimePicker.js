@@ -8,6 +8,7 @@ import DateFmt from '@enact/i18n/ilib/lib/DateFmt';
 import LocaleInfo from '@enact/i18n/ilib/lib/LocaleInfo';
 
 import DateTimeDecorator from '../internal/DateTimeDecorator';
+import Pure from '../internal/Pure';
 
 import TimePickerBase from './TimePickerBase';
 
@@ -88,120 +89,125 @@ const indexOfMeridiem = (time, meridiems) => {
  * @ui
  * @public
  */
-const TimePicker = DateTimeDecorator({
-	customProps: function (i18n, value) {
-		let values = {
-			// i18n props
-			meridiems: i18n.meridiemLabels,
+const TimePicker = Pure(
+	DateTimeDecorator(
+		{
+			customProps: function (i18n, value) {
+				let values = {
+					// i18n props
+					meridiems: i18n.meridiemLabels,
 
-			// date components
-			hour: 12,
-			minute: 0,
-			meridiem: 0
-		};
+					// date components
+					hour: 12,
+					minute: 0,
+					meridiem: 0
+				};
 
-		if (value) {
-			values.hour = value.getHours();
-			values.minute = value.getMinutes();
-			if (i18n.meridiemEnabled) {
-				values.meridiem = indexOfMeridiem(value, i18n.meridiemRanges);
-			}
-		}
-
-		return values;
-	},
-	defaultOrder: ['h', 'm', 'a'],
-	handlers: {
-		onChangeHour: function (ev, value) {
-			const currentTime = DateFactory(value).getTimeExtended();
-			const currentHour = value.hour;
-
-			value.hour = ev.value;
-
-			// In the case of navigating onto the skipped hour of DST, ilib will return the same
-			// value so we skip that hour and update the value again.
-			const newTime = DateFactory(value).getTimeExtended();
-			if (newTime === currentTime) {
-				value.hour = ev.value * 2 - currentHour;
-			}
-
-			return value;
-		},
-
-		onChangeMinute: function (ev, value) {
-			value.minute = ev.value;
-			return value;
-		},
-
-		onChangeMeridiem: function (ev, value, i18n) {
-			const {meridiemRanges} = i18n;
-			const meridiem = meridiemRanges[ev.value];
-
-			if (meridiemRanges.length === 2) {
-				// In the common case of 2 meridiems, we'll offset hours by 12 so that picker stays
-				// the same.
-				value.hour = (value.getHours() + 12) % 24;
-			} else {
-				// In the rarer case of > 2 meridiems (e.g. am-ET), try to set hours only first
-				const hours = Math.floor(meridiem.start / 60);
-				value.hour = hours;
-
-				// but check if it is still out of bounds and update the minutes as well
-				const minutes = hours * 60 + value.getMinutes();
-				if (minutes > meridiem.end) {
-					value.minute = meridiem.end % 60;
-				} else if (minutes < meridiem.start) {
-					value.minute = meridiem.start % 60;
+				if (value) {
+					values.hour = value.getHours();
+					values.minute = value.getMinutes();
+					if (i18n.meridiemEnabled) {
+						values.meridiem = indexOfMeridiem(value, i18n.meridiemRanges);
+					}
 				}
+
+				return values;
+			},
+			defaultOrder: ['h', 'm', 'a'],
+			handlers: {
+				onChangeHour: function (ev, value) {
+					const currentTime = DateFactory(value).getTimeExtended();
+					const currentHour = value.hour;
+
+					value.hour = ev.value;
+
+					// In the case of navigating onto the skipped hour of DST, ilib will return the same
+					// value so we skip that hour and update the value again.
+					const newTime = DateFactory(value).getTimeExtended();
+					if (newTime === currentTime) {
+						value.hour = ev.value * 2 - currentHour;
+					}
+
+					return value;
+				},
+
+				onChangeMinute: function (ev, value) {
+					value.minute = ev.value;
+					return value;
+				},
+
+				onChangeMeridiem: function (ev, value, i18n) {
+					const {meridiemRanges} = i18n;
+					const meridiem = meridiemRanges[ev.value];
+
+					if (meridiemRanges.length === 2) {
+						// In the common case of 2 meridiems, we'll offset hours by 12 so that picker stays
+						// the same.
+						value.hour = (value.getHours() + 12) % 24;
+					} else {
+						// In the rarer case of > 2 meridiems (e.g. am-ET), try to set hours only first
+						const hours = Math.floor(meridiem.start / 60);
+						value.hour = hours;
+
+						// but check if it is still out of bounds and update the minutes as well
+						const minutes = hours * 60 + value.getMinutes();
+						if (minutes > meridiem.end) {
+							value.minute = meridiem.end % 60;
+						} else if (minutes < meridiem.start) {
+							value.minute = meridiem.start % 60;
+						}
+					}
+
+					return value;
+				}
+			},
+			i18n: function () {
+				// Filters used to extract the order of pickers from the ilib template
+				const includeMeridiem = /([khma])(?!\1)/ig;
+				const excludeMeridiem = /([khm])(?!\1)/ig;
+
+				// Label formatter
+				const formatter = new DateFmt({
+					type: 'time',
+					useNative: false,
+					timezone: 'local',
+					length: 'full',
+					date: 'dmwy'
+				});
+
+				// Meridiem localization
+				const merFormatter = new DateFmt({
+					template: 'a',
+					useNative: false,
+					timezone: 'local'
+				});
+				const meridiems = merFormatter.getMeridiemsRange();
+				const meridiemRanges = meridiems.map(calcMeridiemRange);
+				const meridiemLabels = meridiems.map(obj => obj.name);
+
+				// Picker ordering
+				const li = new LocaleInfo();
+				const clockPref = li.getClock();
+				const meridiemEnabled = clockPref === '12';
+
+				const filter = meridiemEnabled ? includeMeridiem : excludeMeridiem;
+				const order = formatter.getTemplate()
+					.replace(/'.*?'/g, '')
+					.match(filter)
+					.map(s => s[0].toLowerCase());
+
+				return {
+					formatter,
+					meridiemEnabled,
+					meridiemLabels,
+					meridiemRanges,
+					order
+				};
 			}
-
-			return value;
-		}
-	},
-	i18n: function () {
-		// Filters used to extract the order of pickers from the ilib template
-		const includeMeridiem = /([khma])(?!\1)/ig;
-		const excludeMeridiem = /([khm])(?!\1)/ig;
-
-		// Label formatter
-		const formatter = new DateFmt({
-			type: 'time',
-			useNative: false,
-			timezone: 'local',
-			length: 'full',
-			date: 'dmwy'
-		});
-
-		// Meridiem localization
-		const merFormatter = new DateFmt({
-			template: 'a',
-			useNative: false,
-			timezone: 'local'
-		});
-		const meridiems = merFormatter.getMeridiemsRange();
-		const meridiemRanges = meridiems.map(calcMeridiemRange);
-		const meridiemLabels = meridiems.map(obj => obj.name);
-
-		// Picker ordering
-		const li = new LocaleInfo();
-		const clockPref = li.getClock();
-		const meridiemEnabled = clockPref === '12';
-
-		const filter = meridiemEnabled ? includeMeridiem : excludeMeridiem;
-		const order = formatter.getTemplate()
-			.replace(/'.*?'/g, '')
-			.match(filter)
-			.map(s => s[0].toLowerCase());
-
-		return {
-			formatter,
-			meridiemEnabled,
-			meridiemLabels,
-			meridiemRanges,
-			order
-		};
-	}
-}, TimePickerBase);
+		},
+		TimePickerBase
+	)
+);
 
 /**
  * The primary text of the item.
