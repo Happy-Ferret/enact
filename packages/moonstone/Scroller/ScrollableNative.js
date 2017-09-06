@@ -7,6 +7,7 @@
 import clamp from 'ramda/src/clamp';
 import classNames from 'classnames';
 import {contextTypes as contextTypesResize} from '@enact/ui/Resizable';
+import {contextTypes as contextTypesRemeasurable} from '@enact/ui/Remeasurable';
 import {contextTypes as contextTypesRtl} from '@enact/i18n/I18nDecorator';
 import deprecate from '@enact/core/internal/deprecate';
 import {forward} from '@enact/core/handle';
@@ -162,14 +163,6 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 			onScroll: PropTypes.func,
 
 			/**
-			 * Called when scrollbar visability changes
-			 *
-			 * @type {Function}
-			 * @public
-			 */
-			onScrollbarVisibilityChange: PropTypes.func,
-
-			/**
 			 * Called when scroll starts
 			 *
 			 * @type {Function}
@@ -214,7 +207,7 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 			verticalScrollbar: 'auto'
 		}
 
-		static childContextTypes = contextTypesResize
+		static childContextTypes = Object.assign({}, contextTypesResize, contextTypesRemeasurable)
 		static contextTypes = contextTypesRtl
 
 		constructor (props) {
@@ -249,7 +242,8 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 
 		getChildContext () {
 			return {
-				invalidateBounds: this.enqueueForceUpdate
+				invalidateBounds: this.enqueueForceUpdate,
+				remeasure: this.state.isVerticalScrollbarVisible
 			};
 		}
 
@@ -264,8 +258,13 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 			on('keydown', this.onKeyDown);
 		}
 
-		componentWillUpdate () {
+		componentWillUpdate (nextProps, nextState, nextContext) {
 			this.deferScrollTo = true;
+			if (nextContext.remeasure !== this.context.remeasure || nextState.isVerticalScrollbarVisible !== this.state.isVerticalScrollbarVisible) {
+				this.setState((prevState) => ({
+					remeasure: !prevState.remeasure
+				}));
+			}
 		}
 
 		componentDidUpdate () {
@@ -895,9 +894,6 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 				);
 
 			if (isVisibilityChanged) {
-				if (this.props.onScrollbarVisibilityChange) {
-					this.props.onScrollbarVisibilityChange();
-				}
 				// one or both scrollbars have changed visibility
 				this.setState({
 					isHorizontalScrollbarVisible: curHorizontalScrollbarVisible,
@@ -1021,7 +1017,6 @@ const ScrollableHoC = hoc((config, Wrapped) => {
 			delete props.focusableScrollbar;
 			delete props.horizontalScrollbar;
 			delete props.onScroll;
-			delete props.onScrollbarVisibilityChange;
 			delete props.onScrollStart;
 			delete props.onScrollStop;
 			delete props.style;

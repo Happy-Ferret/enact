@@ -132,21 +132,6 @@ const extractAriaProps = function (props) {
 	return aria;
 };
 
-/**
- * Gets current timestamp of either `window.performance.now` or `Date.now`
- *
- * @method
- * @memberof core/util
- * @returns {Number}
- */
-const perfNow = function () {
-	if (typeof window === 'object') {
-		return window.performance.now();
-	} else {
-		return Date.now();
-	}
-};
-
 export {
 	cap,
 	childrenEquals,
@@ -154,6 +139,5 @@ export {
 	coerceArray,
 	Job,
 	isRenderable,
-	extractAriaProps,
-	perfNow
+	extractAriaProps
 };
