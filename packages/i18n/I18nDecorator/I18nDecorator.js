@@ -7,6 +7,7 @@
 
 import hoc from '@enact/core/hoc';
 import {on, off} from '@enact/core/dispatcher';
+import {contextTypes as stateContextTypes} from '@enact/core/internal/EnactState';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -49,6 +50,8 @@ const contextTypes = {
 const IntlHoc = hoc((config, Wrapped) => {
 	return class I18nDecorator extends React.Component {
 		static childContextTypes = contextTypes
+		static contextTypes = stateContextTypes
+
 		static propTypes = /** @lends i18n/I18nDecorator.I18nDecorator.prototype */ {
 			className: PropTypes.string,
 			locale: PropTypes.string
@@ -103,8 +106,18 @@ const IntlHoc = hoc((config, Wrapped) => {
 		 * @public
 		 */
 		updateLocale = (newLocale) => {
+			const wasRtl = isRtlLocale();
 			const locale = updateLocale(newLocale);
-			this.setState({locale});
+
+			const isRtl = isRtlLocale();
+
+			if (locale !== this.state.locale) {
+				this.setState({locale});
+
+				if (wasRtl !== isRtl && this.context.publish) {
+					this.context.publish('i18n', {rtl: isRtl});
+				}
+			}
 		}
 
 		render () {

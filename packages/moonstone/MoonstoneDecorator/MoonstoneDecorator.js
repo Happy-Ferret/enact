@@ -11,6 +11,7 @@ import React from 'react';
 import {ResolutionDecorator} from '@enact/ui/resolution';
 import {FloatingLayerDecorator} from '@enact/ui/FloatingLayer';
 import SpotlightRootDecorator from '@enact/spotlight/SpotlightRootDecorator';
+import {Publisher} from '@enact/core/internal/EnactState';
 
 import Skinnable from '../Skinnable';
 
@@ -104,7 +105,10 @@ const MoonstoneDecorator = hoc(defaultConfig, (config, Wrapped) => {
 		}
 	};
 
-	return Decorator;
+	return Publisher(
+		{channels: ['i18n', 'skin']},
+		Decorator
+	);
 });
 
 export default MoonstoneDecorator;
