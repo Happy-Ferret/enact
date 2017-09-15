@@ -836,5 +836,8 @@ const Picker = IdProvider(
 
 
 export default Picker;
-export {Picker};
+export {
+	Picker,
+	PickerBase
+};
 export PickerItem from './PickerItem';

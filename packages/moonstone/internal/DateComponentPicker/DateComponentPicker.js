@@ -6,11 +6,11 @@ import PropTypes from 'prop-types';
 import Pure from '@enact/ui/internal/Pure';
 import Spottable from '@enact/spotlight/Spottable';
 
-import PickerCore, {PickerItem} from '../Picker';
+import {PickerBase, PickerItem} from '../Picker';
 
 import DateComponentPickerChrome from './DateComponentPickerChrome';
 
-const Picker = Pressable(Spottable(PickerCore));
+const Picker = Pressable(Spottable(PickerBase));
 
 /**
  * {@link moonstone/internal/DataComponentPicker.DateComponentPickerBase} allows the selection of one

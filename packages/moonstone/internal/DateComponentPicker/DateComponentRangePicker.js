@@ -1,12 +1,13 @@
-import Changeable from '@enact/ui/Changeable';
 import kind from '@enact/core/kind';
 import React from 'react';
 import PropTypes from 'prop-types';
-
-import RangePicker from '../../RangePicker';
+import Pressable from '@enact/ui/Pressable';
+import Spottable from '@enact/spotlight/Spottable';
+import {RangePickerBase} from '../../RangePicker';
 
 import DateComponentPickerChrome from './DateComponentPickerChrome';
 
+const RangePicker = Pressable(Spottable(RangePickerBase));
 
 /**
  * {@link moonstone/internal/DataComponentPicker.DateComponentRangePicker} allows the selection of
@@ -88,23 +89,8 @@ const DateComponentRangePickerBase = kind({
 	)
 });
 
-/**
- * {@link moonstone/internal/DateComponentPicker.DateComponentRangePicker} allows the selection of one
- * part of the date (date, month, or year). It is a stateful component but allows updates by
- * providing a new `value` via props.
- *
- * @class DateComponentRangePicker
- * @memberof moonstone/internal/DateComponentPicker
- * @mixes ui/Changeable.Changeable
- * @ui
- * @private
- */
-const DateComponentRangePicker = Changeable(
-	DateComponentRangePickerBase
-);
-
-export default DateComponentRangePicker;
+export default DateComponentRangePickerBase;
 export {
-	DateComponentRangePicker,
+	DateComponentRangePickerBase as DateComponentRangePicker,
 	DateComponentRangePickerBase
 };
