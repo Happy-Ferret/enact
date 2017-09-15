@@ -9,7 +9,7 @@
 import React from 'react';
 import invariant from 'invariant';
 import hoc from '@enact/core/hoc';
-import {contextTypes, Publisher, Subscription} from '@enact/core/internal/State';
+import {contextTypes, Publisher, Subscription} from '@enact/core/internal/PubSub';
 
 /**
  * Default config for {@link ui/Remeasurable.RemeasurableDecorator}
@@ -120,7 +120,7 @@ const RemeasurableDecorator = hoc(defaultConfig, (config, Wrapped) => {
  */
 const Remeasurable = Subscription({
 	channels: ['resize'],
-	mapStateToProps: (channel, state) => state
+	mapMessageToProps: (channel, state) => state
 });
 
 export default Remeasurable;

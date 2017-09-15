@@ -12,7 +12,7 @@ import kind from '@enact/core/kind';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Pure from '@enact/ui/internal/Pure';
-import {Subscription} from '@enact/core/internal/State';
+import {Subscription} from '@enact/core/internal/PubSub';
 
 import {Expandable, ExpandableItemBase} from '../ExpandableItem';
 import IconButton from '../IconButton';
@@ -339,7 +339,7 @@ const ExpandablePickerBase = kind({
  */
 const ExpandablePicker = Pure(
 	Subscription(
-		{channels: ['i18n'], mapStateToProps: (channel, {rtl}) => ({rtl})},
+		{channels: ['i18n'], mapMessageToProps: (channel, {rtl}) => ({rtl})},
 		Expandable(
 			Changeable(
 				ExpandablePickerDecorator(

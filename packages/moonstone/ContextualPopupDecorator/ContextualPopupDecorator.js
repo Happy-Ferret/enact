@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import ri from '@enact/ui/resolution';
 import Spotlight, {getDirection} from '@enact/spotlight';
 import SpotlightContainerDecorator from '@enact/spotlight/SpotlightContainerDecorator';
-import {Subscription} from '@enact/core/internal/State';
+import {Subscription} from '@enact/core/internal/PubSub';
 
 import {ContextualPopup} from './ContextualPopup';
 import css from './ContextualPopupDecorator.less';
@@ -539,7 +539,7 @@ const ContextualPopupDecorator = hoc(defaultConfig, (config, Wrapped) => {
 	return Subscription(
 		{
 			channels: ['i18n'],
-			mapStateToProps: (key, {rtl}) => ({rtl})
+			mapMessageToProps: (key, {rtl}) => ({rtl})
 		},
 		Decorator
 	);

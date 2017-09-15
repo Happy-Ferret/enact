@@ -12,7 +12,7 @@
 
 import hoc from '@enact/core/hoc';
 import PropTypes from 'prop-types';
-import {contextTypes as stateContextTypes, Publisher, Subscription} from '@enact/core/internal/State';
+import {contextTypes as stateContextTypes, Publisher, Subscription} from '@enact/core/internal/PubSub';
 import React from 'react';
 
 const contextTypes = {
@@ -191,7 +191,7 @@ const Skinnable = hoc(defaultConfig, (config, Wrapped) => {
  */
 const withSkinnableProps = Subscription({
 	channels: ['skin'],
-	mapStateToProps: (channel, {skin}) => ({skin})
+	mapMessageToProps: (channel, {skin}) => ({skin})
 });
 
 
