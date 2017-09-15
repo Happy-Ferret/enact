@@ -3,6 +3,7 @@ import kind from '@enact/core/kind';
 import Pressable from '@enact/ui/Pressable';
 import React from 'react';
 import PropTypes from 'prop-types';
+import Pure from '@enact/ui/internal/Pure';
 import Spottable from '@enact/spotlight/Spottable';
 
 import PickerCore, {PickerItem} from '../Picker';
@@ -116,8 +117,10 @@ const DateComponentPickerBase = kind({
  * @ui
  * @private
  */
-const DateComponentPicker = Changeable(
-	DateComponentPickerBase
+const DateComponentPicker = Pure(
+	Changeable(
+		DateComponentPickerBase
+	)
 );
 
 export default DateComponentPicker;

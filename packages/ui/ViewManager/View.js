@@ -226,8 +226,6 @@ class View extends React.Component {
 
 		// Arranges the control each tick and calls the provided callback on complete
 		const fn = (start, end, time) => {
-			this.cancelAnimationFrame();
-
 			// percent is the ratio (between 0 and 1) of the current step to the total steps
 			const percent = (time - start) / (end - start);
 			if (!noAnimation && percent < 1) {
@@ -289,6 +287,8 @@ class View extends React.Component {
 
 		if (callback(start, end, time) && typeof window !== 'undefined') {
 			this._raf = window.requestAnimationFrame(() => {
+				this._raf = null;
+
 				const current = window.performance.now();
 				this.transition(start, end, current, callback);
 			});

@@ -12,7 +12,10 @@ import {contextTypes} from './MarqueeController';
 
 const invalidated = [];
 const revalidateJob = new Job(() => {
-	invalidated.forEach(i => i.revalidate());
+	const inv = invalidated.splice();
+	inv.length = 0;
+
+	inv.forEach(i => i.revalidate());
 }, 250);
 
 /**
@@ -310,6 +313,7 @@ const MarqueeDecorator = hoc(defaultConfig, (config, Wrapped) => {
 			}
 
 			invalidated.push(this);
+			revalidateJob.start();
 
 			this.forceRestartMarquee = false;
 		}
