@@ -44,13 +44,13 @@ const PickerButtonBase = kind({
 			delete rest.spotlightDisabled;
 
 			return (
-				<span {...rest} disabled={disabled}>
+				<span {...rest} style={{position: 'relative'}} disabled={disabled}>
 					<Icon className={css.icon} disabled={disabled} small>{icon}</Icon>
 				</span>
 			);
 		} else {
 			return (
-				<IconButton {...rest} backgroundOpacity="transparent" disabled={disabled} small>
+				<IconButton {...rest} style={{position: 'relative'}} backgroundOpacity="transparent" disabled={disabled} small>
 					{icon}
 				</IconButton>
 			);

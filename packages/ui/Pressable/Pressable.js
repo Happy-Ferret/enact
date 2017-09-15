@@ -72,7 +72,7 @@ const PressableHOC = hoc(defaultConfig, (config, Wrapped) => {
 	const {depress, release, prop, leave} = config;
 	const defaultPropKey = 'default' + cap(prop);
 
-	return class Pressable extends React.Component {
+	return class Pressable extends React.PureComponent {
 		static propTypes = /** @lends ui/Pressable.Pressable.prototype */ {
 			/**
 			 * Default pressed state applied at construction when the pressed prop is `undefined` or

@@ -17,6 +17,8 @@ import {validateRange} from '../internal/validators';
 
 import PickerCore, {PickerItem} from '../internal/Picker';
 import SpottablePicker from './SpottablePicker';
+import { compose } from 'recompact'
+
 
 /**
  * The base component for {@link moonstone/Picker.Picker}. This version is not spottable.

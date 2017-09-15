@@ -298,6 +298,7 @@ const ExpandableItemBase = kind({
 		handleLabelKeyDown,
 		handleOpen,
 		label,
+		marqueeDisabled,
 		open,
 		onHide,
 		onShow,
@@ -343,6 +344,7 @@ const ExpandableItemBase = kind({
 					onSpotlightUp={onSpotlightUp}
 					spotlightDisabled={spotlightDisabled}
 					titleIcon={titleIcon}
+					marqueeDisabled={marqueeDisabled}
 				>{title}</LabeledItem>
 				<ExpandableTransitionContainer
 					data-expandable-container

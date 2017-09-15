@@ -63,13 +63,13 @@ const LabeledItemBase = kind({
 		className: 'labeleditem'
 	},
 
-	render: ({children, label, titleIcon, ...rest}) => (
+	render: ({children, label, titleIcon, marqueeDisabled, ...rest}) => (
 		<Controller {...rest}>
 			<div className={css.text}>
-				<MarqueeText className={css.title}>{children}</MarqueeText>
+				<MarqueeText className={css.title} marqueeDisabled={marqueeDisabled}>{children}</MarqueeText>
 				{(titleIcon != null) ? <Icon small className={css.icon}>{titleIcon}</Icon> : null}
 			</div>
-			{(label != null) ? <MarqueeText className={css.label}>{label}</MarqueeText> : null}
+			{(label != null) ? <MarqueeText className={css.label} marqueeDisabled={marqueeDisabled}>{label}</MarqueeText> : null}
 		</Controller>
 	)
 });

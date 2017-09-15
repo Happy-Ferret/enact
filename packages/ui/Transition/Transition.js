@@ -311,7 +311,9 @@ class Transition extends React.Component {
 
 		// Checking that something changed that wasn't the visibility
 		// or the initialHeight state or checking if component should be visible but doesn't have a height
-		if ((visible === prevProps.visible &&
+		if ((this.props.visible === true && prevProps.visible === true)) {
+			return null;
+		} else if ((visible === prevProps.visible &&
 			initialHeight === prevState.initialHeight &&
 			renderState !== TRANSITION_STATE.INIT) ||
 			(initialHeight == null && visible)) {
@@ -344,6 +346,7 @@ class Transition extends React.Component {
 	measureInner = () => {
 		if (this.childNode) {
 			const initialHeight = this.childNode.scrollHeight;
+
 			if (initialHeight !== this.state.initialHeight) {
 				this.setState({
 					initialHeight,

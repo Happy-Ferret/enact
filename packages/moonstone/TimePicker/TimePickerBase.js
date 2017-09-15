@@ -262,6 +262,7 @@ const TimePickerBase = kind({
 				onSpotlightLeft={onSpotlightLeft}
 				onSpotlightRight={onSpotlightRight}
 				spotlightDisabled={spotlightDisabled}
+				marqueeDisabled
 			>
 				<div className={dateComponentPickers} onKeyDown={handlePickerKeyDown}>
 					<div className={css.timeComponents}>

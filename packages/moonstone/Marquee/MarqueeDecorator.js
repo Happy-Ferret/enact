@@ -116,7 +116,7 @@ const MarqueeDecorator = hoc(defaultConfig, (config, Wrapped) => {
 	const forwardEnter = forward(enter);
 	const forwardLeave = forward(leave);
 
-	return class extends React.Component {
+	return class extends React.PureComponent {
 		static displayName = 'MarqueeDecorator'
 
 		static contextTypes = {
