@@ -62,7 +62,7 @@ const Expandable = hoc(defaultConfig, (config, Wrapped) => {
 		RadioDecorator(
 			{activate: 'onOpen', deactivate: 'onClose', prop: 'open'},
 			Cancelable(
-				{component: 'span', onCancel: handleCancel},
+				{component: 'div', onCancel: handleCancel},
 				ExpandableSpotlightDecorator(
 					{noPointerMode: config.noPointerMode},
 					Wrapped

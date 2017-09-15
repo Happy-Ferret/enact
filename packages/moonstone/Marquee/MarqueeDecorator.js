@@ -1,7 +1,7 @@
 import deprecate from '@enact/core/internal/deprecate';
 import hoc from '@enact/core/hoc';
 import {forward} from '@enact/core/handle';
-import {childrenEquals} from '@enact/core/util';
+import {childrenEquals, Job} from '@enact/core/util';
 import {isRtlText} from '@enact/i18n/util';
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -9,6 +9,11 @@ import {contextTypes as stateContextTypes} from '@enact/core/internal/State';
 
 import Marquee from './Marquee';
 import {contextTypes} from './MarqueeController';
+
+const invalidated = [];
+const revalidateJob = new Job(() => {
+	invalidated.forEach(i => i.revalidate());
+}, 250);
 
 /**
  * Default configuration parameters for {@link moonstone/Marquee.MarqueeDecorator}
@@ -303,12 +308,9 @@ const MarqueeDecorator = hoc(defaultConfig, (config, Wrapped) => {
 				// eslint-disable-next-line react/no-did-update-set-state
 				this.setState({rtl});
 			}
-			if (this.distance === null) {
-				this.calculateMetrics();
-			}
-			if (this.shouldStartMarquee()) {
-				this.tryStartingAnimation(this.props.marqueeOn === 'render' ? this.props.marqueeOnRenderDelay : this.props.marqueeDelay);
-			}
+
+			invalidated.push(this);
+
 			this.forceRestartMarquee = false;
 		}
 
@@ -319,9 +321,24 @@ const MarqueeDecorator = hoc(defaultConfig, (config, Wrapped) => {
 				this.context.unregister(this);
 			}
 
+			const i = invalidated.indexOf(this);
+			if (i >= 0) {
+				invalidated.splice(i, 1);
+			}
+
 			if (this.context.Subscriber) {
 				this.context.Subscriber.unsubscribe('resize', this.handleResize);
 				this.context.Subscriber.unsubscribe('i18n', this.handleLocaleChange);
+			}
+		}
+
+		revalidate = () => {
+			if (this.distance === null) {
+				this.calculateMetrics();
+			}
+
+			if (this.shouldStartMarquee()) {
+				this.tryStartingAnimation(this.props.marqueeOn === 'render' ? this.props.marqueeOnRenderDelay : this.props.marqueeDelay);
 			}
 		}
 
