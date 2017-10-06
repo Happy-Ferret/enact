@@ -66,7 +66,7 @@ const FloatingLayerDecorator = hoc(defaultConfig, (config, Wrapped) => {
 		}
 
 		getFloatingLayer = () => {
-			return this.floatingLayer || null;
+			return this.floatingLayer || document.getElementById(floatLayerId) || null;
 		}
 
 		getRootFloatingLayer = () => {

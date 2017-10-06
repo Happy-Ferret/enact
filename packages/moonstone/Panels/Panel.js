@@ -1,3 +1,4 @@
+import {contextTypes} from '@enact/ui/FloatingLayer';
 import deprecate from '@enact/core/internal/deprecate';
 import {forward, handle} from '@enact/core/handle';
 import kind from '@enact/core/kind';
@@ -32,6 +33,8 @@ const adaptToAutoFocus = deprecate(() => 'none', {
 const PanelBase = kind({
 
 	name: 'Panel',
+
+	contextTypes,
 
 	propTypes: /** @lends moonstone/Panels.Panel.prototype */ {
 		/**
@@ -137,6 +140,21 @@ const PanelBase = kind({
 	},
 
 	computed: {
+		'aria-owns': ({'aria-owns': ariaOwns}, {getFloatingLayer}) => {
+			let owns = ariaOwns;
+
+			if (getFloatingLayer) {
+				const layer = getFloatingLayer();
+
+				if (layer && ariaOwns) {
+					owns = `${ariaOwns} ${layer.id}`;
+				} else if (layer) {
+					owns = layer.id;
+				}
+			}
+
+			return owns;
+		},
 		spotOnRender: ({autoFocus, hideChildren, noAutoFocus, spotOnRender}) => {
 			if (noAutoFocus) {
 				autoFocus = adaptToAutoFocus();
