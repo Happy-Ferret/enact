@@ -1033,6 +1033,12 @@ class VirtualListCore extends Component {
 
 		if (containerNode) {
 			containerNode.setAttribute(dataContainerMutedAttribute, bool);
+
+			if (bool) {
+				Spotlight.pause();
+			} else {
+				Spotlight.resume();
+			}
 		}
 	}
 
