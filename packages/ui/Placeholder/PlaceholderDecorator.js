@@ -58,7 +58,7 @@ const PlaceholderDecorator = hoc(defaultConfig, (config, Wrapped) => {
 	const {placeholderComponent: PlaceholderComponent, style} = config;
 	const placeholderStyle = Object.assign({}, defaultConfig.style, style);
 
-	return class extends React.Component {
+	return class extends React.PureComponent {
 		static displayName = 'PlaceholderDecorator'
 
 		static contextTypes = contextTypes
