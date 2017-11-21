@@ -6,6 +6,9 @@
  * @module spotlight/Spottable
  */
 
+import ReactEventListener from 'react-dom/lib/ReactEventListener';
+
+import {off, once} from '@enact/core/dispatcher';
 import {forward, forwardWithPrevent, handle} from '@enact/core/handle';
 import hoc from '@enact/core/hoc';
 import {is} from '@enact/core/keymap';
@@ -177,6 +180,30 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => {
 			this.node = ReactDOM.findDOMNode(this);
 		}
 
+		componentWillUpdate (nextProps) {
+			if (this.node && this.state.spotted && (
+				(!this.props.disabled && nextProps.disabled) ||
+				(!this.props.spotlightDisabled && nextProps.spotlightDisabled)
+			)) {
+				// if the component is becoming unspottable, we need to explicitly listen for the
+				// blur event because it won't be emitted through React because it doesn't bubble
+				// past the originating node.
+				this.onceBlur = once('blur', (ev) => {
+					// dispatch to React's Listener. topBlur is the "special" top-level name for 
+					// blur events from react-dom/lib/EventConstants
+					const isEnabled = ReactEventListener.isEnabled();
+
+					// Normally, the event listener is disabled at this point to prevent spurious
+					// events caused by react manipulating the DOM. We need to enable it temporarily
+					// so that our blur event can be dispatched. Then we restore the enabled state
+					// to whatever it was before we started.
+					ReactEventListener.setEnabled(true);
+					ReactEventListener.dispatchEvent('topBlur', ev);
+					ReactEventListener.setEnabled(isEnabled);
+				}, this.node);
+			}
+		}
+
 		componentDidUpdate (prevProps) {
 			// if the component is spotted and became disabled,
 			if (this.state.spotted && (
@@ -229,6 +256,9 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => {
 			}
 			if (lastSelectTarget === this) {
 				lastSelectTarget = null;
+			}
+			if (this.onceBlur) {
+				off('blur', this.onceBlur, this.node);
 			}
 		}
 
