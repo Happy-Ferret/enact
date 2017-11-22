@@ -1,0 +1,47 @@
+// Icon.less
+//
+
+@import '../styles/mixins.less';
+
+.icon {
+	// Font
+	--font-family: 'Wingdings';
+	--font-size: 64px;
+	--small-font-size: 48px;
+
+	// Dimensions
+	--margin: 4px;
+	--size: 32px;
+	--small-size: 24px;
+	--sprite-size: 36px;
+	--sprite-small-size: 27px;
+
+	width: var(--size);
+	height: var(--size);
+	background-position-x: center;
+	background-position-y: ~'calc(-1 * (var(--sprite-size) - var(--size)) / 2)';
+	background-size: ~'var(--sprite-size) calc(var(--sprite-size) * 2)';
+	background-repeat: no-repeat;
+	display: inline-block;
+	vertical-align: middle;
+	margin: var(--margin);
+	font-family: var(--font-family);
+	font-size: var(--font-size);
+	font-weight: normal;
+	line-height: var(--size);
+	text-align: center;
+	position: relative;
+
+	&.small {
+		background-position-y: ~'calc(-1 * (var(--sprite-small-size) - var(--small-size)) / 2)';
+		background-size: ~'var(--sprite-small-size) calc(var(--sprite-small-size) * 2)';
+		width: var(--small-size);
+		height: var(--small-size);
+		font-size: var(--small-font-size);
+		line-height: var(--small-size);
+	}
+
+	.disabled({
+		cursor: default;
+	});
+}
