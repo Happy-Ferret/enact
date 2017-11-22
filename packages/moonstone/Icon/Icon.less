@@ -6,23 +6,25 @@
 @import '../styles/skin.less';
 
 .icon {
-	--font-family: @moon-icon-font-family;
-	--font-size: @moon-icon-font-size;
-	--font-size-large: @moon-icon-font-size-large;
 	--margin: @moon-icon-margin;
-	--size: @moon-icon-size;
 	--size-large: @moon-icon-size-large;
-	--small-font-size: @moon-icon-small-font-size;
-	--small-font-size-large: @moon-icon-small-font-size-large;
-	--small-size: @moon-icon-small-size;
+	--size: @moon-icon-size;
 	--small-size-large: @moon-icon-small-size-large;
+	--small-size: @moon-icon-small-size;
+
+	--font-family: @moon-icon-font-family;
+	--font-size-large: @moon-icon-font-size-large;
+	--font-size: @moon-icon-font-size;
+	--small-font-size-large: @moon-icon-small-font-size-large;
+	--small-font-size: @moon-icon-small-font-size;
 	--sprite-size: @moon-icon-sprite-size;
 	--sprite-small-size: @moon-icon-sprite-small-size;
 
 	.moon-custom-text({
-		font-size: var(--font-size-large);
-		width: var(--size-large);
 		height: var(--size-large);
+		width: var(--size-large);
+
+		font-size: var(--font-size-large);
 		line-height: var(--size-large);
 	});
 
@@ -31,9 +33,10 @@
 
 	&.small {
 		.moon-custom-text({
-			font-size: var(--small-font-size-large);
-			width: var(--small-size-large);
 			height: var(--small-size-large);
+			width: var(--small-size-large);
+
+			font-size: var(--small-font-size-large);
 			line-height: var(--small-size-large);
 		});
 	}
