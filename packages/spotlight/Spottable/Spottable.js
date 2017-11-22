@@ -169,6 +169,7 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => {
 
 		constructor (props) {
 			super(props);
+			this.onceBlur = null;
 			this.isHovered = false;
 			this.state = {
 				spotted: false
@@ -185,22 +186,7 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => {
 				(!this.props.disabled && nextProps.disabled) ||
 				(!this.props.spotlightDisabled && nextProps.spotlightDisabled)
 			)) {
-				// if the component is becoming unspottable, we need to explicitly listen for the
-				// blur event because it won't be emitted through React because it doesn't bubble
-				// past the originating node.
-				this.onceBlur = once('blur', (ev) => {
-					// dispatch to React's Listener. topBlur is the "special" top-level name for 
-					// blur events from react-dom/lib/EventConstants
-					const isEnabled = ReactEventListener.isEnabled();
-
-					// Normally, the event listener is disabled at this point to prevent spurious
-					// events caused by react manipulating the DOM. We need to enable it temporarily
-					// so that our blur event can be dispatched. Then we restore the enabled state
-					// to whatever it was before we started.
-					ReactEventListener.setEnabled(true);
-					ReactEventListener.dispatchEvent('topBlur', ev);
-					ReactEventListener.setEnabled(isEnabled);
-				}, this.node);
+				this.onceBlur = once('blur', this.dispatchBlur, this.node);
 			}
 		}
 
@@ -260,6 +246,30 @@ const Spottable = hoc(defaultConfig, (config, Wrapped) => {
 			if (this.onceBlur) {
 				off('blur', this.onceBlur, this.node);
 			}
+		}
+
+		/**
+		 * If the component is becoming unfocusable, we need to explicitly listen for the blur
+		 * event. It won't be emitted through React because the event listener is disabled at during
+		 * updates prevent spurious events caused by React manipulating the DOM. 
+		 *
+		 * @private
+		 */
+		dispatchBlur = (ev) => {
+			this.onceBlur = null;
+
+			const isEnabled = ReactEventListener.isEnabled();
+
+			// First, enable the listener temporarily so that our blur event can be
+			// dispatched.
+			ReactEventListener.setEnabled(true);
+
+			// Second, dispatch event to React's Listener. `topBlur` is the "special"
+			// top-level name for blur events from react-dom/lib/EventConstants
+			ReactEventListener.dispatchEvent('topBlur', ev);
+
+			// Finally, restore the enabled state to whatever it was before we started.
+			ReactEventListener.setEnabled(isEnabled);
 		}
 
 		shouldEmulateMouse = ({currentTarget, repeat, type, which}) => {
