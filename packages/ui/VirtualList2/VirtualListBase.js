@@ -1,6 +1,5 @@
 /*
- * Exports the {@link ui/VirtualList.VirtualListBase} and
- * {@link ui/VirtualList.VirtualListCore} components and the
+ * Exports the {@link ui/VirtualList.VirtualListBase} component and the
  * {@link ui/VirtualList.gridListItemSizeShape} validator. The default
  * export is {@link ui/VirtualList.VirtualListBase}.
  */
@@ -8,7 +7,6 @@
 import clamp from 'ramda/src/clamp';
 import classNames from 'classnames';
 import {forward} from '@enact/core/handle';
-import hoc from '@enact/core/hoc';
 import {Job} from '@enact/core/util';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
@@ -16,8 +14,8 @@ import React, {Component} from 'react';
 import {contextTypes as contextTypesResize} from '../Resizable';
 import ri from '../resolution';
 
-import ScrollAnimator from './ScrollAnimator';
-import Scrollbar from './Scrollbar';
+import ScrollAnimator from '../Scroller/ScrollAnimator';
+import Scrollbar from '../Scroller/Scrollbar';
 
 import css from './VirtualListBase.less';
 
@@ -75,20 +73,19 @@ const gridListItemSizeShape = PropTypes.shape({
 
 /**
  * {@link ui/VirtualList.VirtualListBase} is a base component for
- * {@link ui/VirtualList.VirtualList} and
- * {@link ui/VirtualList.VirtualGridList} with Scrollable applied.
+ * {@link ui/VirtualList.VirtualList} and {@link ui/VirtualList.VirtualGridList}.
  *
  * VirtualListBase calls `onScrollStart`, `onScroll`, and `onScrollStop` callback functions during scroll.
  *
- * @class VirtualListCore
+ * @class VirtualListBase
  * @memberof ui/VirtualList
  * @ui
  * @private
  */
-class VirtualListCore extends Component {
+class VirtualListBase extends Component {
 	static displayName = 'VirtualListBase'
 
-	static propTypes = /** @lends ui/VirtualList.VirtualListCore.prototype */ {
+	static propTypes = /** @lends ui/VirtualList.VirtualListBase.prototype */ {
 		/**
 		 * The render function for an item of the list.
 		 * `index` is for accessing the index of the item.
@@ -236,7 +233,7 @@ class VirtualListCore extends Component {
 		spacing: PropTypes.number,
 
 		/**
-		 * Scrollable CSS style.
+		 * VirtualListBase CSS style.
 		 * Should be defined because we manuplate style prop in render().
 		 *
 		 * @type {Object}
@@ -275,9 +272,9 @@ class VirtualListCore extends Component {
 
 	static childContextTypes = contextTypesResize
 
-	/**********************************************************************
+	/*
 	 * Constructor
-	 **********************************************************************/
+	 */
 
 	constructor (props) {
 		super(props);
@@ -301,7 +298,6 @@ class VirtualListCore extends Component {
 			onWheel
 		};
 
-		this.initChildRef = this.initRef('childRef');
 		this.initOuterContainerRef = this.initRef('outerContainerRef');
 		this.initContainerRef = this.initRef('containerRef');
 
@@ -318,9 +314,9 @@ class VirtualListCore extends Component {
 		props.cbScrollTo(this.scrollTo);
 	}
 
-	/**********************************************************************
+	/*
 	 * Context Methods
-	 **********************************************************************/
+	 */
 
 	getChildContext () {
 		return {
@@ -328,42 +324,9 @@ class VirtualListCore extends Component {
 		};
 	}
 
-	/**********************************************************************
+	/*
 	 * Life Cycle Methods
-	 **********************************************************************/
-
-/* From scrollable */
-	componentDidMount () {
-		this.direction = this.childRef.props.direction;
-		this.updateScrollbars();
-	}
-
-	componentWillUpdate () {
-		this.deferScrollTo = true;
-	}
-
-	componentDidUpdate () {
-		// Need to sync calculated client size if it is different from the real size
-		this.childRef.syncClientSize();
-
-		this.direction = this.childRef.props.direction;
-		this.updateScrollbars();
-
-		if (this.scrollToInfo !== null) {
-			if (!this.deferScrollTo) {
-				this.scrollTo(this.scrollToInfo);
-			}
-		}
-	}
-
-	componentWillUnmount () {
-		// Before call cancelAnimationFrame, you must send scrollStop Event.
-		if (this.animator.isAnimating()) {
-			this.doScrollStop();
-			this.animator.stop();
-		}
-		this.forceUpdateJob.stop();
-	}
+	 */
 
 	componentWillMount () {
 		if (this.props.clientSize) {
@@ -371,7 +334,6 @@ class VirtualListCore extends Component {
 			this.updateStatesAndBounds(this.props);
 		}
 	}
-/* From scrollable */
 
 	// Calculate metrics for VirtualList after the 1st render to know client W/H.
 	// We separate code related with data due to re use it when data changed.
@@ -380,6 +342,8 @@ class VirtualListCore extends Component {
 			this.calculateMetrics(this.props);
 			this.updateStatesAndBounds(this.props);
 		}
+
+		this.updateScrollbars();
 	}
 
 	// Call updateStatesAndBounds here when dataSize has been changed to update nomOfItems state.
@@ -403,9 +367,49 @@ class VirtualListCore extends Component {
 		}
 	}
 
-	/**********************************************************************
+	componentWillUpdate () {
+		this.deferScrollTo = true;
+	}
+
+	componentDidUpdate () {
+		const
+			{props} = this,
+			node = this.containerRef;
+
+		if (!props.clientSize && !node) {
+			return;
+		}
+
+		const
+			{clientWidth, clientHeight} = props.clientSize || this.getClientSize(node),
+			{scrollBounds} = this;
+
+		if (clientWidth !== scrollBounds.clientWidth || clientHeight !== scrollBounds.clientHeight) {
+			this.calculateMetrics(props);
+			this.updateStatesAndBounds(props);
+		}
+
+		this.updateScrollbars();
+
+		if (this.scrollToInfo !== null) {
+			if (!this.deferScrollTo) {
+				this.scrollTo(this.scrollToInfo);
+			}
+		}
+	}
+
+	componentWillUnmount () {
+		// Before call cancelAnimationFrame, you must send scrollStop Event.
+		if (this.animator.isAnimating()) {
+			this.doScrollStop();
+			this.animator.stop();
+		}
+		this.forceUpdateJob.stop();
+	}
+
+	/*
 	 * Internal Properties
-	 **********************************************************************/
+	 */
 
 	scrollBounds = {
 		clientWidth: 0,
@@ -438,16 +442,12 @@ class VirtualListCore extends Component {
 
 	containerRef = null
 
-	/**********************************************************************
-	 * Internal Properties
-	 **********************************************************************/
-
-	// status
-	direction = 'vertical'
 	isScrollAnimationTargetAccumulated = false
+
 	wheelDirection = 0
 	isFirstDragging = false
 	isDragging = false
+
 	deferScrollTo = true
 
 	// drag info
@@ -476,15 +476,14 @@ class VirtualListCore extends Component {
 	scrollToInfo = null
 
 	// component info
-	childRef = null
 	outerContainerRef = null
 
 	// scroll animator
 	animator = new ScrollAnimator()
 
-	/**********************************************************************
+	/*
 	 * Event Handlers for Mouse Events
-	 **********************************************************************/
+	 */
 
 	dragStart (e) {
 		const d = this.dragInfo;
@@ -499,7 +498,7 @@ class VirtualListCore extends Component {
 
 	drag (e) {
 		const
-			{direction} = this,
+			{direction} = this.props,
 			t = perf.now(),
 			d = this.dragInfo;
 
@@ -588,9 +587,9 @@ class VirtualListCore extends Component {
 		forwardMouseLeave(e);
 	}
 
-	/**********************************************************************
+	/*
 	 * Event Handlers for Touch Events
-	 **********************************************************************/
+	 */
 
 	onTouchStart = (e) => {
 		this.onMouseDown(e.changedTouches[0]);
@@ -607,9 +606,9 @@ class VirtualListCore extends Component {
 		forwardTouchEnd(e);
 	}
 
-	/**********************************************************************
+	/*
 	 * Event Handlers for Wheel Events
-	 **********************************************************************/
+	 */
 
 	wheel (e, canScrollHorizontally, canScrollVertically) {
 		const
@@ -647,19 +646,19 @@ class VirtualListCore extends Component {
 				canScrollHorizontally = this.canScrollHorizontally(bounds),
 				canScrollVertically = this.canScrollVertically(bounds),
 				delta = this.wheel(e, canScrollHorizontally, canScrollVertically),
-				direction = Math.sign(delta);
+				curWheelDirection = Math.sign(delta);
 
-			if (direction !== this.wheelDirection) {
+			if (curWheelDirection !== this.wheelDirection) {
 				this.isScrollAnimationTargetAccumulated = false;
-				this.wheelDirection = direction;
+				this.wheelDirection = curWheelDirection;
 			}
 			this.scrollToAccumulatedTarget(delta, canScrollVertically);
 		}
 	}
 
-	/**********************************************************************
+	/*
 	 * Internal Methods - callbacks
-	 **********************************************************************/
+	 */
 
 	doScrollStart () {
 		forwardScrollStart({scrollLeft: this.scrollLeft, scrollTop: this.scrollTop, moreInfo: this.getMoreInfo()}, this.props);
@@ -673,9 +672,9 @@ class VirtualListCore extends Component {
 		forwardScrollStop({scrollLeft: this.scrollLeft, scrollTop: this.scrollTop, moreInfo: this.getMoreInfo()}, this.props);
 	}
 
-	/**********************************************************************
+	/*
 	 * Internal Methods
-	 **********************************************************************/
+	 */
 
 	scrollToAccumulatedTarget = (delta, vertical) => {
 		const silent = this.isScrollAnimationTargetAccumulated;
@@ -790,7 +789,7 @@ class VirtualListCore extends Component {
 			this.setScrollTop(top);
 		}
 
-		this.childRef.setScrollPosition(this.scrollLeft, this.scrollTop, dirX, dirY);
+		this.setScrollPosition(this.scrollLeft, this.scrollTop, dirX, dirY);
 		this.doScrolling();
 	}
 
@@ -843,8 +842,8 @@ class VirtualListCore extends Component {
 					}
 				}
 			} else {
-				if (typeof opt.index === 'number' && typeof this.childRef.getItemPosition === 'function') {
-					itemPos = this.childRef.getItemPosition(opt.index, opt.stickTo);
+				if (typeof opt.index === 'number') {
+					itemPos = this.getItemPosition(opt.index, opt.stickTo);
 				}
 				if (itemPos) {
 					if (canScrollHorizontally) {
@@ -875,13 +874,13 @@ class VirtualListCore extends Component {
 	}
 
 	canScrollHorizontally = (bounds) => {
-		const {direction} = this;
+		const {direction} = this.props;
 
 		return (direction === 'horizontal' || direction === 'both') && (bounds.scrollWidth > bounds.clientWidth) && !isNaN(bounds.scrollWidth);
 	}
 
 	canScrollVertically = (bounds) => {
-		const {direction} = this;
+		const {direction} = this.props;
 
 		return (direction === 'vertical' || direction === 'both') && (bounds.scrollHeight > bounds.clientHeight) && !isNaN(bounds.scrollHeight);
 	}
@@ -966,14 +965,14 @@ class VirtualListCore extends Component {
 	// TODO: consider replacing forceUpdate() by storing bounds in state rather than a non-
 	// state member.
 	enqueueForceUpdate = () => {
-		this.childRef.calculateMetrics();
+		this.calculateMetrics();
 		this.forceUpdateJob.start();
 	}
 
 	forceUpdateJob = new Job(this.forceUpdate.bind(this), 32)
-	/**********************************************************************
+	/*
 	 * Internal Methods
-	 **********************************************************************/
+	 */
 
 	isVertical = () => this.isPrimaryDirectionVertical
 
@@ -1306,28 +1305,9 @@ class VirtualListCore extends Component {
 		return (Math.ceil(curDataSize / dimensionToExtent) * primary.gridSize) - spacing;
 	}
 
-	syncClientSize = () => {
-		const
-			{props} = this,
-			node = this.containerRef;
-
-		if (!props.clientSize && !node) {
-			return;
-		}
-
-		const
-			{clientWidth, clientHeight} = props.clientSize || this.getClientSize(node),
-			{scrollBounds} = this;
-
-		if (clientWidth !== scrollBounds.clientWidth || clientHeight !== scrollBounds.clientHeight) {
-			this.calculateMetrics(props);
-			this.updateStatesAndBounds(props);
-		}
-	}
-
-	/**********************************************************************
+	/*
 	 * render methods
-	 **********************************************************************/
+	 */
 
 	initRef (prop) {
 		return (ref) => {
@@ -1337,9 +1317,9 @@ class VirtualListCore extends Component {
 
 	/* prevent scrolling by web engine */
 	handleScroll = () => {
-		if (!this.animator.isAnimating() && this.childRef && this.childRef.outerContainerRef) {
-			this.childRef.outerContainerRef.scrollTop = this.scrollTop;
-			this.childRef.outerContainerRef.scrollLeft = this.scrollLeft;
+		if (!this.animator.isAnimating() && this.outerContainerRef) {
+			this.outerContainerRef.scrollTop = this.scrollTop;
+			this.outerContainerRef.scrollLeft = this.scrollLeft;
 		}
 	}
 
@@ -1358,7 +1338,7 @@ class VirtualListCore extends Component {
 			{className, style} = this.props,
 			{isHorizontalScrollbarVisible, isVerticalScrollbarVisible} = this.state,
 			{primary, cc} = this,
-			scrollableClasses = classNames(css.virtualListBase, className);
+			virtualListClasses = classNames(css.virtualListBase, className);
 
 		delete props.cbScrollTo;
 		delete props.className;
@@ -1383,18 +1363,17 @@ class VirtualListCore extends Component {
 
 		return (
 			<div
-				className={scrollableClasses}
+				className={virtualListClasses}
 				ref={this.initOuterContainerRef}
 				style={style}
 			>
 				<div className={css.outerContainer}>
 					<div
 						{...props}
-						ref={this.initContainerRef}>
-						{...this.eventHandlers}
 						className={css.innerContainer}
+						ref={this.initContainerRef}
+						{...this.eventHandlers}
 						onScroll={this.handleScroll}
-						ref={this.initChildRef}
 					>
 						{cc}
 					</div>
@@ -1406,18 +1385,5 @@ class VirtualListCore extends Component {
 	}
 }
 
-/**
- * {@link ui/VirtualList.VirtualListBase} is a base component for
- * {@link ui/VirtualList.VirtualList} and
- * {@link ui/VirtualList.VirtualGridList} with Scrollable applied.
- *
- * @class VirtualListBase
- * @memberof ui/VirtualList
- * @mixes ui/Scrollable
- * @ui
- * @private
- */
-const VirtualListBase = Scrollable(VirtualListCore);
-
 export default VirtualListBase;
-export {gridListItemSizeShape, VirtualListCore, VirtualListBase};
+export {gridListItemSizeShape, VirtualListBase};
