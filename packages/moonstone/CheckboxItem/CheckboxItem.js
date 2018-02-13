@@ -5,13 +5,12 @@
  */
 
 import kind from '@enact/core/kind';
-import React from 'react';
 import PropTypes from 'prop-types';
-import Pure from '@enact/ui/internal/Pure';
-import Toggleable from '@enact/ui/Toggleable';
+import compose from 'ramda/src/compose';
+import React from 'react';
 
 import Skinnable from '../Skinnable';
-import {ToggleItemBase} from '../ToggleItem';
+import {ToggleItemBase, ToggleItemDecorator} from '../ToggleItem';
 import Checkbox from '../Checkbox';
 
 /**
@@ -110,6 +109,7 @@ const CheckboxItemBase = kind({
 	)
 });
 
+
 /**
  * {@link moonstone/CheckboxItem.CheckboxItem} is a component that is an Item that is Toggleable. It
  * has two states: `true` (selected) & `false` (unselected). It uses a check icon to represent its
@@ -125,14 +125,7 @@ const CheckboxItemBase = kind({
  * @ui
  * @public
  */
-const CheckboxItem = Pure(
-	Toggleable(
-		{prop: 'selected'},
-		Skinnable(
-			CheckboxItemBase
-		)
-	)
-);
+const CheckboxItem = ToggleItemDecorator(CheckboxItemBase);
 
 export default CheckboxItem;
 export {CheckboxItem, CheckboxItemBase};

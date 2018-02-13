@@ -44,6 +44,10 @@ const ToggleIconBase = kind({
 		className: 'icon'
 	},
 
+	computed: {
+		className: ({selected, styler}) => styler.append({selected})
+	},
+
 	render: ({children, ...rest}) => {
 		if (children) {
 			if (React.isValidElement(children)) {

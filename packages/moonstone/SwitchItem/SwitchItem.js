@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import Pure from '@enact/ui/internal/Pure';
 import Toggleable from '@enact/ui/Toggleable';
 
-import {ToggleItemBase} from '../ToggleItem';
+import {ToggleItemBase, ToggleItemDecorator} from '../ToggleItem';
 import Switch from '../Switch';
 
 import css from './SwitchItem.less';
@@ -118,12 +118,10 @@ const SwitchItemBase = kind({
  * @ui
  * @public
  */
-const SwitchItem = Pure(
-	Toggleable(
-		{prop: 'selected'},
-		SwitchItemBase
-	)
-);
+const SwitchItem = ToggleItemDecorator(SwitchItemBase);
 
 export default SwitchItem;
-export {SwitchItem, SwitchItemBase};
+export {
+	SwitchItem,
+	SwitchItemBase
+};

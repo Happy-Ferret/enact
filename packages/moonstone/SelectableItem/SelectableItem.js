@@ -5,14 +5,12 @@
  */
 
 import kind from '@enact/core/kind';
-import React from 'react';
-import PropTypes from 'prop-types';
-import Pure from '@enact/ui/internal/Pure';
-import Toggleable from '@enact/ui/Toggleable';
 import {RemeasurableDecorator} from '@enact/ui/Remeasurable';
+import PropTypes from 'prop-types';
+import compose from 'ramda/src/compose';
+import React from 'react';
 
-import {ToggleItemBase} from '../ToggleItem';
-import Skinnable from '../Skinnable';
+import {ToggleItemBase, ToggleItemDecorator} from '../ToggleItem';
 
 import css from './SelectableItem.less';
 
@@ -102,6 +100,10 @@ const SelectableItemBase = kind({
 	)
 });
 
+const SelectableItemDecorator = compose(
+	ToggleItemDecorator,
+	RemeasurableDecorator({trigger: 'selected'})
+);
 
 /**
  * {@link moonstone/SelectableItem.SelectableItem} is component that is an Item that is
@@ -119,17 +121,7 @@ const SelectableItemBase = kind({
  * @ui
  * @public
  */
-const SelectableItem = Pure(
-	Toggleable(
-		{prop: 'selected'},
-		RemeasurableDecorator(
-			{trigger: 'selected'},
-			Skinnable(
-				SelectableItemBase
-			)
-		)
-	)
-);
+const SelectableItem = SelectableItemDecorator(SelectableItemBase);
 
 export default SelectableItem;
 export {SelectableItem, SelectableItemBase};
