@@ -1111,12 +1111,56 @@ class VirtualListCore extends Component {
 		return (this.getVirtualScrollDimension() <= (this.isPrimaryDirectionVertical ? clientHeight : clientWidth));
 	}
 
-	syncClientSize = () => {
+	isScrollbarExpected (props) {
+		const
+			{direction, itemSize, spacing} = props;
+
+		if (!(itemSize.minHeight && itemSize.minWidth)) {
+			return null;
+		}
+
+		const
+			{clientWidth, clientHeight} = (props.clientSize || this.getClientSize(this.containerRef)),
+			heightInfo = {
+				clientSize: clientHeight,
+				minItemSize: itemSize.minHeight
+			},
+			widthInfo = {
+				clientSize: clientWidth,
+				minItemSize: itemSize.minWidth
+			};
+		let primary, secondary, dimensionToExtent, primaryGridSize, scrollDimension;
+
+		if (direction === 'vertical') {
+			primary = heightInfo;
+			secondary = widthInfo;
+		} else {
+			primary = widthInfo;
+			secondary = heightInfo;
+		}
+
+		dimensionToExtent = Math.max(Math.floor((secondary.clientSize + spacing) / (secondary.minItemSize + spacing)), 1);
+		secondary.itemSize = Math.floor((secondary.clientSize - (spacing * (dimensionToExtent - 1))) / dimensionToExtent);
+		primary.itemSize = Math.floor(primary.minItemSize * (secondary.itemSize / secondary.minItemSize));
+
+		primaryGridSize = primary.itemSize + spacing;
+		scrollDimension = (Math.ceil(props.dataSize / dimensionToExtent) * primaryGridSize) - spacing;
+
+		return (scrollDimension > (direction === 'vertical') ? clientHeight : clientWidth);
+	}
+
+
+	syncClientSize = (prevProps, scrollbarVisible) => {
 		const
 			{props} = this,
 			node = this.containerRef;
 
 		if (!props.clientSize && !node) {
+			return false;
+		}
+
+		if (scrollbarVisible && this.isSameTotalItemSizeWithClient() && this.isScrollbarExpected(prevProps)) {
+			console.log('infinite loop expected');
 			return false;
 		}
 
