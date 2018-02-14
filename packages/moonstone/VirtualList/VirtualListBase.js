@@ -1111,10 +1111,17 @@ class VirtualListCore extends Component {
 		return (this.getVirtualScrollDimension() <= (this.isPrimaryDirectionVertical ? clientHeight : clientWidth));
 	}
 
+	// This method is the minimized form of calculateMetrics() to determind infinite cases.
+	// If we add 'applyToThis' (or something other name) parameter to calculateMetrics() for update properties of 'this' or not,
+	// (the default value of 'applyToThis' should be false)
+	// we can use calculateMetrics() instead of the new method isScrollbarExpected which has redundant code.
+	// I had only a couple of hours to make this PoC. Sorry.
 	isScrollbarExpected (props) {
 		const
 			{direction, itemSize, spacing} = props;
 
+		// if the list is not a grid list, we don't need to worry about infinite loop cases
+		// since the primary grid size is not changed along with the client size of the secondary axis.
 		if (!(itemSize.minHeight && itemSize.minWidth)) {
 			return null;
 		}
@@ -1146,6 +1153,7 @@ class VirtualListCore extends Component {
 		primaryGridSize = primary.itemSize + spacing;
 		scrollDimension = (Math.ceil(props.dataSize / dimensionToExtent) * primaryGridSize) - spacing;
 
+		// If returns 'true', it menas that the content is logner than the client size.
 		return (scrollDimension > (direction === 'vertical') ? clientHeight : clientWidth);
 	}
 
@@ -1159,6 +1167,19 @@ class VirtualListCore extends Component {
 			return false;
 		}
 
+		// scrollbarVisible === true: Scrollable has a scrollbar at this time
+		// this.isSameTotalItemSizeWithClient() === true: but a list's content is equal to or shorter than the client size
+		// (So, if two conditions above meet, Scrollable WILL remove its scrollbar in the next update.
+		//
+		// this.isScrollbarExpected() === true: if there is no scrollbar, the content will be longer than the client size
+		// Note that prevProps is used to get 'clientSize' of the previous status and it assumed that Scrollable did not has
+		// a scrollbar in the previous status.
+		//
+		// To avoid any side effect, we need to check that at least four props are exactly same as the previous status in Scrollable.
+		// 1) the width and the height of Scrollable
+		// 2) dataSize
+		// 3) itemSize
+		// 4) spacing
 		if (scrollbarVisible && this.isSameTotalItemSizeWithClient() && this.isScrollbarExpected(prevProps)) {
 			console.log('infinite loop expected');
 			return false;
