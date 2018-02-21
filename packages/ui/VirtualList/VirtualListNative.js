@@ -1,3 +1,13 @@
+/**
+ * Provides unstyled virtual list components and behaviors to be customized by a theme or application.
+ *
+ * @module ui/VirtualListNative
+ * @exports VirtualListNative
+ * @exports VirtualGridListNative
+ * @exports VirtualListBaseNative
+ * @exports gridListItemSizeShape
+ */
+
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
@@ -40,7 +50,7 @@ class VirtualListBaseNative extends Component {
 		 * - `data` is for accessing the supplied `data` property of the list.
 		 * > NOTE: In most cases, it is recommended to use data from redux store instead of using
 		 * is parameters due to performance optimizations
-		 * - `data-index` is required for Spotlight 5-way navigation.  Pass to the root element in
+		 * - `data-index` is required for Spotlight 5-way navigation. Pass to the root element in
 		 *   the component.
 		 * - `index` is the index number of the componet to render
 		 * - `key` MUST be passed as a prop to the root element in the component for DOM recycling.
@@ -97,11 +107,11 @@ class VirtualListBaseNative extends Component {
 		 */
 		clientSize: PropTypes.shape({
 			clientWidth: PropTypes.number.isRequired,
-			clientHeight:  PropTypes.number.isRequired
+			clientHeight: PropTypes.number.isRequired
 		}),
 
 		/**
-		 * Data for passing through to the `component` prop.
+		 * Data for passing it through `component` prop.
 		 * NOTICE: For performance reason, changing this prop does NOT always cause the list to
 		 * redraw its items.
 		 *
@@ -110,14 +120,6 @@ class VirtualListBaseNative extends Component {
 		 * @public
 		 */
 		data: PropTypes.any,
-
-		/**
-		 * Spotlight container Id
-		 *
-		 * @type {String}
-		 * @private
-		 */
-		'data-container-id': PropTypes.string, // eslint-disable-line react/sort-prop-types
 
 		/**
 		 * Size of the data.
@@ -181,6 +183,7 @@ class VirtualListBaseNative extends Component {
 		super(props);
 
 		this.state = {firstIndex: 0, numOfItems: 0};
+		this.initContentRef = this.initRef('contentRef');
 		this.initContainerRef = this.initRef('containerRef');
 	}
 
@@ -251,7 +254,6 @@ class VirtualListBaseNative extends Component {
 	curDataSize = 0
 	cc = []
 	scrollPosition = 0
-	isScrolledByJump = false
 
 	containerClass = null
 	contentRef = null
@@ -260,7 +262,6 @@ class VirtualListBaseNative extends Component {
 	isVertical = () => this.isPrimaryDirectionVertical
 
 	isHorizontal = () => !this.isPrimaryDirectionVertical
-
 
 	getScrollBounds = () => this.scrollBounds
 
@@ -392,7 +393,7 @@ class VirtualListBaseNative extends Component {
 
 		if (wasFirstIndexMax && dataSizeDiff > 0) { // If dataSize increased from bottom, we need adjust firstIndex
 			// If this is a gridlist and dataSizeDiff is smaller than 1 line, we are adjusting firstIndex without threshold change.
-			if (dimensionToExtent > 1 &&  dataSizeDiff < dimensionToExtent) {
+			if (dimensionToExtent > 1 && dataSizeDiff < dimensionToExtent) {
 				newFirstIndex = maxFirstIndex;
 			} else { // For other bottom adding case, we need to update firstIndex and threshold.
 				const
@@ -455,6 +456,20 @@ class VirtualListBaseNative extends Component {
 		if (this.contentRef) {
 			this.contentRef.style.width = this.scrollBounds.scrollWidth + 'px';
 			this.contentRef.style.height = this.scrollBounds.scrollHeight + 'px';
+		}
+	}
+
+	updateMoreInfo (dataSize, primaryPosition) {
+		const
+			{dimensionToExtent, moreInfo} = this,
+			{itemSize, gridSize, clientSize} = this.primary;
+
+		if (dataSize <= 0) {
+			moreInfo.firstVisibleIndex = null;
+			moreInfo.lastVisibleIndex = null;
+		} else {
+			moreInfo.firstVisibleIndex = (Math.floor((primaryPosition - itemSize) / gridSize) + 1) * dimensionToExtent;
+			moreInfo.lastVisibleIndex = Math.min(dataSize - 1, Math.ceil((primaryPosition + clientSize) / gridSize) * dimensionToExtent - 1);
 		}
 	}
 
@@ -547,6 +562,7 @@ class VirtualListBaseNative extends Component {
 			key = index % this.state.numOfItems,
 			style = {display: 'none'},
 			attributes = {key, style};
+
 		this.cc[key] = (<div {...attributes} />);
 	}
 
@@ -614,20 +630,6 @@ class VirtualListBaseNative extends Component {
 
 	getXY = (primaryPosition, secondaryPosition) => (this.isPrimaryDirectionVertical ? {x: secondaryPosition, y: primaryPosition} : {x: primaryPosition, y: secondaryPosition})
 
-	updateMoreInfo (dataSize, primaryPosition) {
-		const
-			{dimensionToExtent, moreInfo} = this,
-			{itemSize, gridSize, clientSize} = this.primary;
-
-		if (dataSize <= 0) {
-			moreInfo.firstVisibleIndex = null;
-			moreInfo.lastVisibleIndex = null;
-		} else {
-			moreInfo.firstVisibleIndex = (Math.floor((primaryPosition - itemSize) / gridSize) + 1) * dimensionToExtent;
-			moreInfo.lastVisibleIndex = Math.min(dataSize - 1, Math.ceil((primaryPosition + clientSize) / gridSize) * dimensionToExtent - 1);
-		}
-	}
-
 	getScrollHeight = () => (this.isPrimaryDirectionVertical ? this.getVirtualScrollDimension() : this.scrollBounds.clientHeight)
 
 	getScrollWidth = () => (this.isPrimaryDirectionVertical ? this.scrollBounds.clientWidth : this.getVirtualScrollDimension())
@@ -670,6 +672,9 @@ class VirtualListBaseNative extends Component {
 
 		return false;
 	}
+
+	// override
+	onKeyDown = () => {}
 
 	// render
 

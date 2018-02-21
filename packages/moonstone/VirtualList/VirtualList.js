@@ -106,7 +106,7 @@ const VirtualListBase = (type, UiComponent) => (
 		componentDidMount () {
 			super.componentDidMount();
 
-			if (type == 'JS') {
+			if (type === 'JS') {
 				const containerNode = this.containerRef;
 
 				// prevent native scrolling by Spotlight
@@ -129,9 +129,19 @@ const VirtualListBase = (type, UiComponent) => (
 			if (this.setContainerDisabled) {
 				this.setContainerDisabled(false);
 			}
+
+			if (type === 'JS') {
+				const containerNode = this.containerRef;
+
+				// remove a function for preventing native scrolling by Spotlight
+				if (containerNode && containerNode.removeEventListener) {
+					containerNode.removeEventListener('scroll', this.preventScroll);
+				}
+			}
 		}
 
 		isScrolledBy5way = false
+		isScrolledByJump = false
 		lastFocusedIndex = null
 		nodeIndexToBeFocused = null
 		preservedIndex = null
@@ -615,7 +625,7 @@ const VirtualListBase = (type, UiComponent) => (
 		 * setter/getter
 		 */
 
-		shouldPreventScrollByFocus = () => ((type === 'Native') ? (this.isScrolledBy5way) : (this.isScrolledBy5way || this.isScrolledByJump))
+		shouldPreventScrollByFocus = () => ((type === 'Native') ? (this.isScrolledBy5way || this.isScrolledByJump) : (this.isScrolledBy5way))
 
 		getNodeIndexToBeFocused = () => this.nodeIndexToBeFocused
 
